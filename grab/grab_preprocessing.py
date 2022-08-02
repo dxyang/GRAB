@@ -64,10 +64,10 @@ class GRABDataSet(object):
         else:
             assert isinstance(cfg.splits, dict)
             self.splits = cfg.splits
-            
+
         self.all_seqs = glob.glob(self.grab_path + '/*/*.npz')
-        
-        ## to be filled 
+
+        ## to be filled
         self.selected_seqs = []
         self.obj_based_seqs = {}
         self.sbj_based_seqs = {}
@@ -192,20 +192,20 @@ class GRABDataSet(object):
 
                 ### for objects
 
-                obj_info = self.load_obj_verts(obj_name, seq_data, cfg.n_verts_sample)
+                # obj_info = self.load_obj_verts(obj_name, seq_data, cfg.n_verts_sample)
 
-                if cfg.save_object_verts:
+                # if cfg.save_object_verts:
 
-                    obj_m = ObjectModel(v_template=obj_info['verts_sample'],
-                                        batch_size=T)
-                    obj_parms = params2torch(obj_params)
-                    verts_obj = to_cpu(obj_m(**obj_parms).vertices)
-                    object_data['verts'].append(verts_obj)
+                #     obj_m = ObjectModel(v_template=obj_info['verts_sample'],
+                #                         batch_size=T)
+                #     obj_parms = params2torch(obj_params)
+                #     verts_obj = to_cpu(obj_m(**obj_parms).vertices)
+                #     object_data['verts'].append(verts_obj)
 
-                if cfg.save_contact:
+                # if cfg.save_contact:
 
-                    body_data['contact'].append(seq_data.contact.body[frame_mask])
-                    object_data['contact'].append(seq_data.contact.object[frame_mask][:,obj_info['verts_sample_id']])
+                #     body_data['contact'].append(seq_data.contact.body[frame_mask])
+                #     object_data['contact'].append(seq_data.contact.object[frame_mask][:,obj_info['verts_sample_id']])
 
                 frame_names.extend(['%s_%s' % (sequence.split('.')[0], fId) for fId in np.arange(T)])
 
@@ -310,24 +310,24 @@ class GRABDataSet(object):
 if __name__ == '__main__':
 
 
-    instructions = ''' 
+    instructions = '''
     Please do the following steps before starting the GRAB dataset processing:
-    1. Download GRAB dataset from the website https://grab.is.tue.mpg.de/ 
+    1. Download GRAB dataset from the website https://grab.is.tue.mpg.de/
     2. Set the grab_path, out_path to the correct folder
     3. Change the configuration file for your desired data, like:
-    
+
         a) if you only need the frames with contact,
         b) if you need body, hand, or object vertices to be computed,
         c) which data splits
             and etc
-        
+
         WARNING: saving vertices requires a high-capacity RAM memory.
-        
+
     4. In case you need body or hand vertices make sure to set the model_path
-        to the models downloaded from smplx website 
-    
+        to the models downloaded from smplx website
+
     This code will process the data and save the pt files in the out_path folder.
-    You can use the dataloader.py file to load and use the data.    
+    You can use the dataloader.py file to load and use the data.
 
         '''
 

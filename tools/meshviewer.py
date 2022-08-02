@@ -129,7 +129,7 @@ class MeshViewer(object):
                                     name = 'scene')
 
         self.aspect_ratio = float(width) / height
-        pc = pyrender.PerspectiveCamera(yfov=np.pi / 3.0, aspectRatio=self.aspect_ratio)
+        pc = pyrender.PerspectiveCamera(yfov=np.pi / 2, aspectRatio=self.aspect_ratio)
         camera_pose = np.eye(4)
         camera_pose[:3,:3] = euler([80,-15,0], 'xzx')
         camera_pose[:3, 3] = np.array([-.5, -2., 1.5])
@@ -157,11 +157,15 @@ class MeshViewer(object):
 
 
     def is_active(self):
-        return self.viewer.is_active
+        if hasattr(self.viewer, "is_active"):
+            return self.viewer.is_active
+        else:
+            return False
 
     def close_viewer(self):
-        if self.viewer.is_active:
-            self.viewer.close_external()
+        if hasattr(self.viewer, "is_active"):
+            if self.viewer.is_active:
+                self.viewer.close_external()
 
     def set_background_color(self, bg_color=[1., 1., 1.]):
         self.scene.bg_color = bg_color

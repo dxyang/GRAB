@@ -74,33 +74,34 @@ def vis_sequence(cfg,sequence, mv):
         verts_sbj = to_cpu(sbj_m(**sbj_parms).vertices)
 
 
-        obj_mesh = os.path.join(grab_path, '..', seq_data.object.object_mesh)
-        obj_mesh = Mesh(filename=obj_mesh)
-        obj_vtemp = np.array(obj_mesh.vertices)
-        obj_m = ObjectModel(v_template=obj_vtemp,
-                            batch_size=T)
-        obj_parms = params2torch(seq_data.object.params)
-        verts_obj = to_cpu(obj_m(**obj_parms).vertices)
+        # obj_mesh = os.path.join(grab_path, '..', seq_data.object.object_mesh)
+        # obj_mesh = Mesh(filename=obj_mesh)
+        # obj_vtemp = np.array(obj_mesh.vertices)
+        # obj_m = ObjectModel(v_template=obj_vtemp,
+        #                     batch_size=T)
+        # obj_parms = params2torch(seq_data.object.params)
+        # verts_obj = to_cpu(obj_m(**obj_parms).vertices)
 
-        table_mesh = os.path.join(grab_path, '..', seq_data.table.table_mesh)
-        table_mesh = Mesh(filename=table_mesh)
-        table_vtemp = np.array(table_mesh.vertices)
-        table_m = ObjectModel(v_template=table_vtemp,
-                            batch_size=T)
-        table_parms = params2torch(seq_data.table.params)
-        verts_table = to_cpu(table_m(**table_parms).vertices)
+        # table_mesh = os.path.join(grab_path, '..', seq_data.table.table_mesh)
+        # table_mesh = Mesh(filename=table_mesh)
+        # table_vtemp = np.array(table_mesh.vertices)
+        # table_m = ObjectModel(v_template=table_vtemp,
+        #                     batch_size=T)
+        # table_parms = params2torch(seq_data.table.params)
+        # verts_table = to_cpu(table_m(**table_parms).vertices)
 
         skip_frame = 4
         for frame in range(0,T, skip_frame):
-            o_mesh = Mesh(vertices=verts_obj[frame], faces=obj_mesh.faces, vc=colors['yellow'])
-            o_mesh.set_vertex_colors(vc=colors['red'], vertex_ids=seq_data['contact']['object'][frame] > 0)
+            # o_mesh = Mesh(vertices=verts_obj[frame], faces=obj_mesh.faces, vc=colors['yellow'])
+            # o_mesh.set_vertex_colors(vc=colors['red'], vertex_ids=seq_data['contact']['object'][frame] > 0)
 
             s_mesh = Mesh(vertices=verts_sbj[frame], faces=sbj_m.faces, vc=colors['pink'], smooth=True)
             s_mesh.set_vertex_colors(vc=colors['red'], vertex_ids=seq_data['contact']['body'][frame] > 0)
 
-            t_mesh = Mesh(vertices=verts_table[frame], faces=table_mesh.faces, vc=colors['white'])
+            # t_mesh = Mesh(vertices=verts_table[frame], faces=table_mesh.faces, vc=colors['white'])
 
-            mv.set_static_meshes([o_mesh, s_mesh, t_mesh])
+            # mv.set_static_meshes([o_mesh, s_mesh, t_mesh])
+            mv.set_static_meshes([s_mesh])
 
 
 if __name__ == '__main__':
