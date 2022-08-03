@@ -30,7 +30,7 @@ import time
 
 
 from tools.objectmodel import ObjectModel
-from tools.meshviewer import Mesh, MeshViewer, points2sphere, colors
+from tools.meshviewer import Mesh, MeshViewer, points2sphere, colors, CAMERA_FOV
 from tools.utils import parse_npz
 from tools.utils import params2torch
 from tools.utils import makepath
@@ -178,7 +178,7 @@ def check_num_points_in_camera_view(T_world_camera: np.ndarray, y_fov: float, x_
     return num_in_fov
 
 def render_sequences(cfg, subject: int = None):
-    random_sequence = True
+    random_sequence = False
 
     grab_path = cfg.grab_path
     if subject is not None:
@@ -205,12 +205,14 @@ def render_sequences(cfg, subject: int = None):
 
 
 def vis_sequence(cfg,sequence, mv):
-        draw_meshcat = True
-        render_meshes = False
-        gen_dset_mode = False
-        full_scene = False
-        if gen_dset_mode:
-            assert render_meshes and not full_scene and not draw_meshcat
+        print(sequence)
+
+        '''
+        some knobs to turn
+        '''
+        draw_meshcat = False
+        render_meshes = False    # save camera images to disk with rendered meshes
+        gen_dset_mode = True
 
         '''
         required setup - load data, load models, create base template models
@@ -315,7 +317,9 @@ def vis_sequence(cfg,sequence, mv):
         output setup depending on what we're doing
         '''
         if gen_dset_mode:
+            ref_render_folder = f"{cfg.render_path}_reference"
             egoseq_render_path = makepath(sequence.replace('.npz','').replace(cfg.grab_path, cfg.render_path))
+            seq_render_path = makepath(sequence.replace('.npz','').replace(cfg.grab_path, ref_render_folder))
             skip_frame = 1
 
             # h5py setup
@@ -343,7 +347,7 @@ def vis_sequence(cfg,sequence, mv):
         else:
             seq_render_path = makepath(sequence.replace('.npz','').replace(cfg.grab_path, cfg.render_path))
             egoseq_render_path = makepath(f"{seq_render_path}/egocam")
-            skip_frame = 1
+            skip_frame = 4
 
         '''
         yay let's finally do the frame by frame rendering thing!
@@ -389,7 +393,7 @@ def vis_sequence(cfg,sequence, mv):
             T_betweenEyes_mountedCam = np.array([
                 [1.0, 0.0, 0.0, 0.0],
                 [0.0, np.cos(xaxis_rot), np.sin(xaxis_rot), 0.03],
-                [0.0, -np.sin(xaxis_rot), np.cos(xaxis_rot), -0.03],
+                [0.0, -np.sin(xaxis_rot), np.cos(xaxis_rot), 0.0],
                 [0.0, 0.0, 0.0, 1.0],
             ])
 
@@ -403,8 +407,6 @@ def vis_sequence(cfg,sequence, mv):
             rh_mesh = Mesh(vertices=right_hand_vertices.T, faces=right_mano_default_model.faces, smooth=True) #vc=colors['green'], smooth=True)
 
             # see if the hands will be rendered within the camera fov
-            CAMERA_FOV = np.pi / 2
-
             num_in_fov_lh = check_num_points_in_camera_view(T_world_egoCam, CAMERA_FOV, CAMERA_FOV, left_hand_vertices)
             num_in_fov_rh = check_num_points_in_camera_view(T_world_egoCam, CAMERA_FOV, CAMERA_FOV, right_hand_vertices)
 
@@ -413,18 +415,14 @@ def vis_sequence(cfg,sequence, mv):
 
             # update meshes and generate snapshot
             if render_meshes:
-                if full_scene:
-                    mv.set_static_meshes([o_mesh, s_mesh, s_mesh_wf, t_mesh, lh_mesh, rh_mesh])
-                else:
-                    mv.set_static_meshes([lh_mesh, rh_mesh])
+                # mv.set_static_meshes([o_mesh, s_mesh, s_mesh_wf, t_mesh, lh_mesh, rh_mesh])
+                # camera_pose = np.eye(4)
+                # camera_pose[:3, :3] = euler([80, -15, 0], 'xzx')
+                # camera_pose[:3, 3] = np.array([-.5, -1.4, 1.5])
+                # mv.update_camera_pose(camera_pose)
+                # mv.save_snapshot(seq_render_path+'/%04d.png'%frame)
 
-                if not gen_dset_mode:
-                    camera_pose = np.eye(4)
-                    camera_pose[:3, :3] = euler([80, -15, 0], 'xzx')
-                    camera_pose[:3, 3] = np.array([-.5, -1.4, 1.5])
-                    mv.update_camera_pose(camera_pose)
-                    mv.save_snapshot(seq_render_path+'/%04d.png'%frame)
-
+                mv.set_static_meshes([lh_mesh, rh_mesh])
                 mv.update_camera_pose(T_world_egoCam)
                 mv.save_snapshot(egoseq_render_path+'/%04d.png'%frame)
 
@@ -521,7 +519,7 @@ def vis_sequence(cfg,sequence, mv):
             f.flush()
             f.close()
         else:
-            input()
+            pass
 
 if __name__ == '__main__':
 
@@ -554,5 +552,6 @@ if __name__ == '__main__':
     }
 
     cfg = Config(**cfg)
-    render_sequences(cfg)
+
+    render_sequences(cfg,subject=args.subject)
 

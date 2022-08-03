@@ -25,6 +25,8 @@ from PIL import Image
 from .utils import euler
 
 
+CAMERA_FOV = np.pi / 180.0 * 42.0
+
 class Mesh(trimesh.Trimesh):
 
     def __init__(self,
@@ -129,7 +131,8 @@ class MeshViewer(object):
                                     name = 'scene')
 
         self.aspect_ratio = float(width) / height
-        pc = pyrender.PerspectiveCamera(yfov=np.pi / 2, aspectRatio=self.aspect_ratio)
+        # pc = pyrender.PerspectiveCamera(yfov=np.pi / 2, aspectRatio=self.aspect_ratio) # this is more similar to a GoPro
+        pc = pyrender.PerspectiveCamera(yfov=CAMERA_FOV, aspectRatio=self.aspect_ratio) # this is more simlilar to a Realsense RGB
         camera_pose = np.eye(4)
         camera_pose[:3,:3] = euler([80,-15,0], 'xzx')
         camera_pose[:3, 3] = np.array([-.5, -2., 1.5])
