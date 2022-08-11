@@ -23,7 +23,7 @@ from tqdm import tqdm
 import pickle
 import h5py
 from pytorch3d import transforms
-from meshcat_viewer import get_visualizer, draw_point_cloud, draw_transform
+from utils.meshcat_viewer import get_visualizer, draw_point_cloud, draw_transform
 from smplx.vertex_ids import vertex_ids
 from smplx.joint_names import JOINT_NAMES
 import time

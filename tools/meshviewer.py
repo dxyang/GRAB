@@ -118,7 +118,8 @@ class MeshViewer(object):
                  height=800,
                  bg_color = [0.0, 0.0, 0.0, 1.0],
                  offscreen = False,
-                 registered_keys=None):
+                 registered_keys=None,
+                 use_ortho_cam=False):
         super(MeshViewer, self).__init__()
 
         if registered_keys is None:
@@ -131,11 +132,22 @@ class MeshViewer(object):
                                     name = 'scene')
 
         self.aspect_ratio = float(width) / height
-        # pc = pyrender.PerspectiveCamera(yfov=np.pi / 2, aspectRatio=self.aspect_ratio) # this is more similar to a GoPro
-        pc = pyrender.PerspectiveCamera(yfov=CAMERA_FOV, aspectRatio=self.aspect_ratio) # this is more simlilar to a Realsense RGB
-        camera_pose = np.eye(4)
-        camera_pose[:3,:3] = euler([80,-15,0], 'xzx')
-        camera_pose[:3, 3] = np.array([-.5, -2., 1.5])
+        if not use_ortho_cam:
+            # pc = pyrender.PerspectiveCamera(yfov=np.pi / 2, aspectRatio=self.aspect_ratio) # this is more similar to a GoPro
+            pc = pyrender.PerspectiveCamera(yfov=CAMERA_FOV, aspectRatio=self.aspect_ratio) # this is more simlilar to a Realsense RGB
+            camera_pose = np.eye(4)
+            camera_pose[:3,:3] = euler([80,-15,0], 'xzx')
+            camera_pose[:3, 3] = np.array([-.5, -2., 1.5])
+            light_pose = camera_pose
+        else:
+            pc = pyrender.OrthographicCamera(xmag=1.0, ymag=1.0, znear=0.00001)
+            camera_pose = np.eye(4)
+            light_pose = np.array([
+                [1, 0, 0, 0],
+                [0, 1, 0, 0],
+                [0, 0, 1, 0],
+                [0, 0, 0, 1],
+            ])
 
         self.cam = pyrender.Node(name = 'camera', camera=pc, matrix=camera_pose)
 
@@ -143,7 +155,7 @@ class MeshViewer(object):
 
         if self.offscreen:
             light = Node(light=DirectionalLight(color=np.ones(3), intensity=3.0),
-                          matrix=camera_pose)
+                          matrix=light_pose)
             self.scene.add_node(light)
             self.viewer = pyrender.OffscreenRenderer(width, height)
         else:
