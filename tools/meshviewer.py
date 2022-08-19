@@ -139,22 +139,21 @@ class MeshViewer(object):
             camera_pose[:3,:3] = euler([80,-15,0], 'xzx')
             camera_pose[:3, 3] = np.array([-.5, -2., 1.5])
             light_pose = camera_pose
+            light_intensity = 3.0
         else:
             pc = pyrender.OrthographicCamera(xmag=1.0, ymag=1.0, znear=0.00001)
             camera_pose = np.eye(4)
-            light_pose = np.array([
-                [1, 0, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 1, 0],
-                [0, 0, 0, 1],
-            ])
+            light_pose = np.eye(4)
+            light_pose[:3,:3] = euler([-80,-15,0], 'xzx')
+            light_pose[:3, 3] = np.array([.5, 2., 1.5])
+            light_intensity = 0.03
 
         self.cam = pyrender.Node(name = 'camera', camera=pc, matrix=camera_pose)
 
         self.scene.add_node(self.cam)
 
         if self.offscreen:
-            light = Node(light=DirectionalLight(color=np.ones(3), intensity=3.0),
+            light = Node(light=DirectionalLight(color=np.ones(3), intensity=light_intensity),
                           matrix=light_pose)
             self.scene.add_node(light)
             self.viewer = pyrender.OffscreenRenderer(width, height)
